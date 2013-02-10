@@ -17,7 +17,7 @@
 
 (define (irc-get-connection host port)
   (let-values ([(in out) (tcp-connect host port)])
-    (file-stream-buffer-mode out 'line)    
+    (file-stream-buffer-mode out 'line)
     (irc-connection in out)))
 
 (define (irc-send-command connection command . parameters)
@@ -39,7 +39,7 @@
 
 (define (irc-connect server port nick real-name)
   (define-values (in out) (tcp-connect server port))
-  (file-stream-buffer-mode out 'line)    
+  (file-stream-buffer-mode out 'line)
   (define connection (irc-connection in out))
   (irc-set-nick connection nick)
   (irc-set-user-info connection nick real-name)
