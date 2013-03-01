@@ -1,6 +1,7 @@
 #lang racket
 
 (require "irc.rkt")
+(require racket/async-channel)
 (require racket/gui/base)
 
 (define window-frame (new frame% [label "IRC Test Client"]))
@@ -67,17 +68,22 @@
 
 (define reader-thread
   (thread (lambda ()
-	    (define incoming (irc-connection-in-port connection))
+	    (define incoming (irc-connection-in-channel connection))
 
-          (let loop ()
-            (define line (read-line incoming))
-            (unless (eof-object? line)
-	      (define raw-message (read-line incoming))
-              (printf "~a\n" raw-message)
-              (hash-set! window-texts current-window
-                         (string-append (hash-ref window-texts current-window) "\n" raw-message))
+            (let loop ()
+              (define message (async-channel-get incoming))
+              (match message
+                [(? irc-message?)
+                 (define msg-to-print (format "Prefix: ~a, CMD: ~a, params: ~a\n"
+                                              (irc-message-prefix message)
+                                              (irc-message-command message)
+                                              (irc-message-parameters message)))
+                 (printf "~a\n" msg-to-print)
+                 (hash-set! window-texts current-window
+                            (string-append (hash-ref window-texts current-window) "\n" msg-to-print))]
+                [_ (printf "unparsable: ~a\n" (irc-raw-message-content message))])
               (refresh-messages)
-              (loop))))))
+              (loop)))))
 
 #;(irc-join-channel connection "##racketirctest")
 #;(irc-send-message connection "##racketirctest" "Hello")
