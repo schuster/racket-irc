@@ -2,6 +2,7 @@
 
 (require racket/async-channel)
 (require racket/list)
+(require racket/match)
 (require racket/string)
 (require racket/tcp)
 
@@ -32,15 +33,19 @@
   (define-values (in out) (tcp-connect host port))
   (file-stream-buffer-mode out 'line)
   (define in-channel (make-async-channel))
+  (define connection (irc-connection in out in-channel))
 
   (thread (lambda ()
             (let loop ()
               (define line (read-line in))
               (unless (eof-object? line)
-                (async-channel-put in-channel (parse-message line)))
-              (loop))))
-
-  (irc-connection in out in-channel))
+                (define message (parse-message line))
+                (match message
+                  [(irc-message _ _ "PING" params)
+                   (irc-send-command connection "PONG" "pongresponse")]
+                  [_ (async-channel-put in-channel message)])
+                (loop)))))
+  connection)
 
 (define (irc-send-command connection command . parameters)
   (fprintf (irc-connection-out-port connection)
