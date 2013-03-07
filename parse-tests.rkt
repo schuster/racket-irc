@@ -16,3 +16,9 @@
 (pm (parse-message "my-command arg1 arg2 arg3 4 5 6 7 8 9 0 1 2 3 4 5 6"))
 
 (pm (parse-message "my-command arg1 arg2 arg3 4 :5 6 7 8 9 0 1 2 3 4 5 6"))
+
+(printf "~s\n" (parse-message ""))
+
+(printf "~s\n" (parse-message "   "))
+
+(printf "~a\n" (parse-message ":something  "))
