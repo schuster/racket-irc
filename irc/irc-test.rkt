@@ -1,6 +1,6 @@
 #lang racket
 
-(require "irc.rkt")
+(require "main.rkt")
 (require racket/async-channel)
 (require racket/gui/base)
 

@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require "irc.rkt")
+(require "main.rkt")
 
 (define (pm m)
   (printf "~a|~a|~s\n" (irc-message-prefix m) (irc-message-command m) (irc-message-parameters m)))
