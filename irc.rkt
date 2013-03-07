@@ -82,14 +82,15 @@
 ;; Given the string of an IRC message, returns an irc-raw-message that has been parsed as far as possible
 (define (parse-message message)
   (define parts (string-split message))
-  ;; TODO: check that there's at least one non-prefix part - return #f if not
-  ;; also check that prefix is not empty string
-  (define prefix (if (string-starts-with? (list-ref parts 0) ":")
+  (define prefix (if (and (pair? parts)
+                          (string-starts-with? (list-ref parts 0) ":"))
                      (substring (list-ref parts 0) 1)
                      #f))
-  (define command (list-ref parts (if prefix 1 0)))
-  (define param-parts (list-tail parts (if prefix 2 1)))
-  (irc-message message prefix command (parse-params param-parts)))
+  (cond [(> (length parts) (if prefix 1 0))
+         (define command (list-ref parts (if prefix 1 0)))
+         (define param-parts (list-tail parts (if prefix 2 1)))
+         (irc-message message prefix command (parse-params param-parts))]
+        [else #f]))
 
 ;; Given the list of param parts, return the list of params
 (define (parse-params parts)
