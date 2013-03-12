@@ -1,4 +1,4 @@
-irc
+racket-irc
 ===
 
 Racket IRC library
