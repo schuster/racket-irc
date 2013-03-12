@@ -122,3 +122,39 @@
 (define (string-starts-with? s1 s2)
   (equal? (substring s1 0 (string-length s2))
           s2))
+
+(module+ test
+  (require rackunit)
+
+  (define (message-equal? m1 m2)
+    (and (equal? (irc-message-prefix m1) (irc-message-prefix m2))
+         (equal? (irc-message-command m1) (irc-message-command m2))
+         (equal? (irc-message-parameters m1) (irc-message-parameters m2))))
+
+  (check message-equal?
+         (parse-message ":my-prefix my-command arg1 arg2 arg3")
+         (irc-message ":my-prefix my-command arg1 arg2 arg3"
+                      "my-prefix"
+                      "my-command"
+                      (list "arg1" "arg2" "arg3"))))
+
+#|
+
+  TODO: add these tests
+
+
+(pm (parse-message ":my-prefix my-command arg1 arg2 arg3 :4  5 6 7 8 9 0 1 2 3 4 5 6"))
+
+(pm (parse-message ":my-prefix my-command arg1 arg2 arg3 4 5 6 7 8 9 0 1 2 3 4 5"))
+
+(pm (parse-message "my-command arg1 arg2 arg3 4 5 6 7 8 9 0 1 2 3 4 5 6"))
+
+(pm (parse-message "my-command arg1 arg2 arg3 4 :5 6 7 8 9 0 1 2 3 4 5 6"))
+
+(printf "~s\n" (parse-message ""))
+
+(printf "~s\n" (parse-message "   "))
+
+(printf "~a\n" (parse-message ":something  "))
+
+|#
