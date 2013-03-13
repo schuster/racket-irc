@@ -7,7 +7,7 @@
 (require racket/tcp)
 
 (provide irc-get-connection
-         irc-connection-in-channel
+         irc-connection-incoming
          irc-send-command
          irc-send-message
          irc-join-channel
@@ -21,6 +21,8 @@
 (struct irc-connection (in-port out-port in-channel))
 (struct irc-raw-message (content))
 (struct irc-message irc-raw-message (prefix command parameters))
+
+(define irc-connection-incoming irc-connection-in-channel)
 
 (define (irc-get-connection host port)
   (define-values (in out) (tcp-connect host port))

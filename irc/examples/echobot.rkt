@@ -1,13 +1,13 @@
 #lang racket
 
 (require racket/async-channel)
-(require "main.rkt")
+(require irc)
 
 (define connection (irc-connect "chat.freenode.net" 6667 "schubot" "Schuster's Echo Bot"))
 (sleep 5)
 
 (irc-join-channel connection "##racketirctest")
-(define incoming (irc-connection-in-channel connection))
+(define incoming (irc-connection-incoming connection))
 
 (let loop ()
   (define message (async-channel-get incoming))
