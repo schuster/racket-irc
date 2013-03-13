@@ -5,7 +5,7 @@
 
 @title{IRC Client Library}
 
-@defmodule{irc}
+@defmodule[irc]
 
 @;; TODO: make IRC a code thing
 The irc library allows you to develop an IRC client and communicate across IRC.
@@ -43,9 +43,9 @@ Once you have joined, you can send a message on that channel with the following:
           irc-connection?]{
   Connects to @racket[server] on @racket[port] using @racket[nick] as the IRC nickname and @racket[real-name] as the user's real name.}
 
-@defproc[(irc-connection-in-channel [connection irc-connection?])
+@defproc[(irc-connection-incoming [connection irc-connection?])
          async-channel?]{
-  Returns the channel for incoming messages on the given connection. All responses from the server are sent to this channel, and will be a @racket[irc-raw-message] or one of its subtypes.}
+  Returns the channel for incoming messages on the given connection. All responses from the server are sent to this channel, and will be an @racket[irc-raw-message] or one of its subtypes.}
 
 @defproc[(irc-join-channel [connection irc-connection?]
                            [channel string?])
