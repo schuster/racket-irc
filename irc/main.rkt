@@ -19,14 +19,6 @@
          (struct-out irc-message))
 
 (struct irc-connection (in-port out-port in-channel))
-
-;; IRC message types
-;; * irc-raw-message
-;;   * irc-unparsable-message
-;;   * irc-message
-;;     * irc-channel-message
-;;     * etc.
-
 (struct irc-raw-message (content))
 (struct irc-message irc-raw-message (prefix command parameters))
 
