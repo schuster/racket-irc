@@ -14,6 +14,7 @@
 	 irc-connect
 	 irc-set-nick
 	 irc-set-user-info
+         irc-connection?
          (struct-out irc-raw-message)
          (struct-out irc-message))
 
