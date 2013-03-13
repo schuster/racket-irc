@@ -9,11 +9,11 @@
 (provide irc-get-connection
          irc-connection-in-channel
          irc-send-command
-	 irc-send-message
-	 irc-join-channel
-	 irc-connect
-	 irc-set-nick
-	 irc-set-user-info
+         irc-send-message
+         irc-join-channel
+         irc-connect
+         irc-set-nick
+         irc-set-user-info
          irc-connection?
          (struct-out irc-raw-message)
          (struct-out irc-message))
@@ -59,11 +59,11 @@
 
 (define (irc-set-user-info connection nick real-name)
   (irc-send-command connection
-		    "USER"
-		    nick
-		    "0"
-		    "*"
-		    (string-append ":" real-name)))
+                    "USER"
+                    nick
+                    "0"
+                    "*"
+                    (string-append ":" real-name)))
 
 (define (irc-connect server port nick real-name)
   (define connection (irc-get-connection server port))
