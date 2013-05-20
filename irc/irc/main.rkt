@@ -14,6 +14,7 @@
          irc-connect
          irc-set-nick
          irc-set-user-info
+         irc-quit
          irc-connection?
          (struct-out irc-raw-message)
          (struct-out irc-message))
@@ -73,6 +74,13 @@
 		    "PRIVMSG"
 		    target
 		    (string-append ":" message)))
+
+(define (irc-quit [quit-message ""])
+  (if (string=? quit-message "")
+      (irc-send-command connection "QUIT")
+      (irc-send-command connection "QUIT" quit-message))
+  (close-output-port (irc-connection-out-port connection))
+  (close-input-port (irc-connection-in-port connection)))
 
 ;; Given the string of an IRC message, returns an irc-raw-message that has been parsed as far as possible
 (define (parse-message message)
