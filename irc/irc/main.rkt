@@ -21,7 +21,7 @@
 
 (struct irc-connection (in-port out-port in-channel))
 (struct irc-raw-message (content))
-(struct irc-message irc-raw-message (prefix command parameters))
+(struct irc-message irc-raw-message (prefix command parameters) #:transparent)
 
 (define irc-connection-incoming irc-connection-in-channel)
 
@@ -126,6 +126,7 @@
   (equal? (substring s1 0 (string-length s2))
           s2))
 
+;; Run these via ``raco test main.rkt''
 (module+ test
   (require rackunit)
 
@@ -134,30 +135,41 @@
          (equal? (irc-message-command m1) (irc-message-command m2))
          (equal? (irc-message-parameters m1) (irc-message-parameters m2))))
 
-  (check message-equal?
-         (parse-message ":my-prefix my-command arg1 arg2 arg3")
-         (irc-message ":my-prefix my-command arg1 arg2 arg3"
-                      "my-prefix"
-                      "my-command"
-                      (list "arg1" "arg2" "arg3"))))
+  (define-check (check-parse input expected-prefix expected-command expected-args)
+    (let ([actual (parse-message input)]
+          [expected (irc-message input
+                                 expected-prefix
+                                 expected-command
+                                 expected-args)])
+      (with-check-info*
+       (list (make-check-actual actual)
+             (make-check-expected expected))
+       (lambda ()
+         (when (not
+                (message-equal?
+                 actual
+                 expected))
+           (fail-check))))))
 
-#|
+  (check-parse ":my-prefix my-command arg1 arg2 arg3"
+               "my-prefix"
+               "my-command"
+               (list "arg1" "arg2" "arg3"))
+  (check-parse ":my-prefix my-command arg1 arg2 arg3 :4  5 6 7 8 9 0 1 2 3 4 5 6"
+               "my-prefix"
+               "my-command"
+               (list "arg1" "arg2" "arg3" "4 5 6 7 8 9 0 1 2 3 4 5 6"))
+  (check-parse ":my-prefix my-command arg1 arg2 arg3 4 5 6 7 8 9 0 1 2 3 4 5"
+               "my-prefix"
+               "my-command"
+               (list "arg1" "arg2" "arg3" "4" "5" "6" "7" "8" "9" "0" "1" "2" "3" "4" "5"))
+  (check-parse "my-command arg1 arg2 arg3 4 5 6 7 8 9 0 1 2 3 4 5 6"
+               #f
+               "my-command"
+               (list "arg1" "arg2" "arg3" "4" "5" "6" "7" "8" "9" "0" "1" "2" "3" "4" "5" "6"))
 
-  TODO: add these tests
-
-
-(pm (parse-message ":my-prefix my-command arg1 arg2 arg3 :4  5 6 7 8 9 0 1 2 3 4 5 6"))
-
-(pm (parse-message ":my-prefix my-command arg1 arg2 arg3 4 5 6 7 8 9 0 1 2 3 4 5"))
-
-(pm (parse-message "my-command arg1 arg2 arg3 4 5 6 7 8 9 0 1 2 3 4 5 6"))
-
-(pm (parse-message "my-command arg1 arg2 arg3 4 :5 6 7 8 9 0 1 2 3 4 5 6"))
-
-(printf "~s\n" (parse-message ""))
-
-(printf "~s\n" (parse-message "   "))
-
-(printf "~a\n" (parse-message ":something  "))
-
-|#
+  (check-parse "my-command arg1 arg2 arg3 4 :5 6 7 8 9 0 1 2 3 4 5 6"
+               #f
+               "my-command"
+               (list "arg1" "arg2" "arg3" "4" "5 6 7 8 9 0 1 2 3 4 5 6"))
+  )
