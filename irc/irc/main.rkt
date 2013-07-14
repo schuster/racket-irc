@@ -75,7 +75,7 @@
 		    target
 		    (string-append ":" message)))
 
-(define (irc-quit [quit-message ""])
+(define (irc-quit connection [quit-message ""])
   (if (string=? quit-message "")
       (irc-send-command connection "QUIT")
       (irc-send-command connection "QUIT" quit-message))
