@@ -166,7 +166,7 @@
   (check-parse "my-command arg1 arg2 arg3 4 5 6 7 8 9 0 1 2 3 4 5 6"
                #f
                "my-command"
-               (list "arg1" "arg2" "arg3" "4" "5" "6" "7" "8" "9" "0" "1" "2" "3" "4" "5" "6"))
+               (list "arg1" "arg2" "arg3" "4" "5" "6" "7" "8" "9" "0" "1" "2" "3" "4" "5 6"))
 
   (check-parse "my-command arg1 arg2 arg3 4 :5 6 7 8 9 0 1 2 3 4 5 6"
                #f
