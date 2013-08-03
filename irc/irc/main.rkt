@@ -16,16 +16,14 @@
          irc-set-user-info
          irc-quit
          irc-connection?
-         (struct-out irc-raw-message)
          (struct-out irc-message))
 
 (struct irc-connection (in-port out-port in-channel))
-(struct irc-raw-message (content))
-(struct irc-message irc-raw-message (prefix command parameters) #:transparent)
+(struct irc-message (prefix command parameters content) #:transparent)
 
 (define irc-connection-incoming irc-connection-in-channel)
 
-(define (irc-get-connection host port)
+(define (irc-get-connection host port #:return-eof [return-eof #f])
   (define-values (in out) (tcp-connect host port))
   (file-stream-buffer-mode out 'line)
   (define in-channel (make-async-channel))
@@ -34,13 +32,18 @@
   (thread (lambda ()
             (let loop ()
               (define line (read-line in))
-              (unless (eof-object? line)
+              (cond
+               [(eof-object? line)
+                (when return-eof
+                  (async-channel-put in-channel line))]
+               [else
                 (define message (parse-message line))
                 (match message
-                  [(irc-message _ _ "PING" params)
+                  [#f (void)]
+                  [(irc-message _ "PING" params _)
                    (irc-send-command connection "PONG" "pongresponse")]
                   [_ (async-channel-put in-channel message)])
-                (loop)))))
+                (loop)]))))
   connection)
 
 (define (irc-send-command connection command . parameters)
@@ -82,7 +85,8 @@
   (close-output-port (irc-connection-out-port connection))
   (close-input-port (irc-connection-in-port connection)))
 
-;; Given the string of an IRC message, returns an irc-raw-message that has been parsed as far as possible
+;; Given the string of an IRC message, returns an irc-message that has been parsed as far as possible,
+;; or #f if the input was unparsable
 (define (parse-message message)
   (define parts (string-split message))
   (define prefix (if (and (pair? parts)
@@ -92,7 +96,7 @@
   (cond [(> (length parts) (if prefix 1 0))
          (define command (list-ref parts (if prefix 1 0)))
          (define param-parts (list-tail parts (if prefix 2 1)))
-         (irc-message message prefix command (parse-params param-parts))]
+         (irc-message prefix command (parse-params param-parts) message)]
         [else #f]))
 
 ;; Given the list of param parts, return the list of params
@@ -137,10 +141,10 @@
 
   (define-check (check-parse input expected-prefix expected-command expected-args)
     (let ([actual (parse-message input)]
-          [expected (irc-message input
-                                 expected-prefix
+          [expected (irc-message expected-prefix
                                  expected-command
-                                 expected-args)])
+                                 expected-args
+                                 input)])
       (with-check-info*
        (list (make-check-actual actual)
              (make-check-expected expected))
