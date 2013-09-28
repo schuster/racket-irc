@@ -12,6 +12,7 @@
          irc-send-message
          irc-send-notice
          irc-join-channel
+         irc-part-channel
          irc-connect
          irc-set-nick
          irc-set-user-info
@@ -56,12 +57,12 @@
 (define (irc-set-nick connection nick)
   (irc-send-command connection "NICK" nick))
 
-(define (irc-set-user-info connection nick real-name)
+(define (irc-set-user-info connection username hostname server-name real-name)
   (irc-send-command connection
                     "USER"
-                    nick
-                    "0"
-                    "*"
+                    username
+                    hostname
+                    server-name
                     (string-append ":" real-name)))
 
 (define (irc-connect server port nick real-name)
@@ -72,6 +73,9 @@
 
 (define (irc-join-channel connection channel)
   (irc-send-command connection "JOIN" channel))
+
+(define (irc-part-channel connection channel)
+  (irc-send-command connection "PART" channel))
 
 (define (irc-send-message connection target message)
   (irc-send-command connection
