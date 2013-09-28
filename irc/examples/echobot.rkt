@@ -1,7 +1,7 @@
 #lang racket
 
 (require racket/async-channel)
-(require irc)
+(require "../main.rkt")
 
 (define connection (irc-connect "chat.freenode.net" 6667 "schubot" "Schuster's Echo Bot"))
 (sleep 5)
