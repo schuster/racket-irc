@@ -10,6 +10,7 @@
          irc-connection-incoming
          irc-send-command
          irc-send-message
+         irc-send-notice
          irc-join-channel
          irc-connect
          irc-set-nick
@@ -77,6 +78,12 @@
 		    "PRIVMSG"
 		    target
 		    (string-append ":" message)))
+
+(define (irc-send-notice connection target message)
+  (irc-send-command connection
+                    "NOTICE"
+                    target
+                    (string-append ":" message)))
 
 (define (irc-quit connection [quit-message ""])
   (if (string=? quit-message "")
