@@ -77,22 +77,23 @@
 (define (irc-set-nick connection nick)
   (irc-send-command connection "NICK" nick))
 
-(define (irc-set-user-info connection username hostname server-name real-name)
+(define (irc-set-user-info connection username real-name)
   (irc-send-command connection
                     "USER"
                     username
-                    hostname
-                    server-name
+                    "0"
+                    "*"
                     (string-append ":" real-name)))
 
-;; TODO: add hostname, servername, etc.  Connects to an IRC server, returning the connection and an
-;; event that will be ready for synchronization when the server is ready for more commands
-(define (irc-connect server port nick real-name)
+
+;; Connects to an IRC server, returning the connection and an event that will be ready for
+;; synchronization when the server is ready for more commands
+(define (irc-connect server port nick username real-name)
   (define connection (irc-get-connection server port))
   (define sema (make-semaphore))
   (add-handler connection (listen-for-connect sema))
   (irc-set-nick connection nick)
-  (irc-set-user-info connection "schubot" "*" "*" real-name)
+  (irc-set-user-info connection username real-name)
   (values connection sema))
 
 (define ((listen-for-connect sema) message connection handler-id)
