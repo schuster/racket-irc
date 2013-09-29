@@ -1,11 +1,5 @@
 #lang racket/base
 
-(require racket/async-channel)
-(require racket/list)
-(require racket/match)
-(require racket/string)
-(require racket/tcp)
-
 (provide irc-get-connection
          irc-connection-incoming
          irc-send-command
@@ -20,7 +14,16 @@
          irc-connection?
          (struct-out irc-message))
 
-(struct irc-connection (in-port out-port in-channel))
+;; ---------------------------------------------------------------------------------------------------
+
+(require racket/async-channel
+         racket/list
+         racket/match
+         racket/string
+         racket/tcp
+         "private/numeric-replies.rkt")
+
+(struct irc-connection (in-port out-port in-channel handlers))
 (struct irc-message (prefix command parameters content) #:transparent)
 
 (define irc-connection-incoming irc-connection-in-channel)
@@ -29,7 +32,10 @@
   (define-values (in out) (tcp-connect host port))
   (file-stream-buffer-mode out 'line)
   (define in-channel (make-async-channel))
-  (define connection (irc-connection in out in-channel))
+  (define handlers (make-hash))
+  (define connection (irc-connection in out in-channel handlers))
+  (add-handler connection send-to-user)
+  (add-handler connection handle-ping)
 
   (thread (lambda ()
             (let loop ()
@@ -40,11 +46,10 @@
                   (async-channel-put in-channel line))]
                [else
                 (define message (parse-message line))
-                (match message
-                  [#f (void)]
-                  [(irc-message _ "PING" params _)
-                   (irc-send-command connection "PONG" "pongresponse")]
-                  [_ (async-channel-put in-channel message)])
+                (when message
+                  ;; convert to list here so that we can remove hash table elements during the loop
+                  (for ([kv (hash->list (irc-connection-handlers connection))])
+                    ((cdr kv) message connection (car kv))))
                 (loop)]))))
   connection)
 
@@ -53,6 +58,21 @@
            "~a ~a\r\n"
            command
            (string-join parameters)))
+
+(define (add-handler connection callback)
+  (hash-set! (irc-connection-handlers connection) (gensym) callback))
+
+(define (remove-handler connection handler-id)
+  (hash-remove! (irc-connection-handlers connection) handler-id))
+
+(define (send-to-user message connection handler-key)
+  (async-channel-put (irc-connection-in-channel connection) message))
+
+(define (handle-ping message connection handler-key)
+  (match message
+    [(irc-message _ "PING" params _)
+     (irc-send-command connection "PONG" "pongresponse")]
+    [_ (void)]))
 
 (define (irc-set-nick connection nick)
   (irc-send-command connection "NICK" nick))
@@ -65,11 +85,22 @@
                     server-name
                     (string-append ":" real-name)))
 
+;; TODO: add hostname, servername, etc.  Connects to an IRC server, returning the connection and an
+;; event that will be ready for synchronization when the server is ready for more commands
 (define (irc-connect server port nick real-name)
   (define connection (irc-get-connection server port))
+  (define sema (make-semaphore))
+  (add-handler connection (listen-for-connect sema))
   (irc-set-nick connection nick)
-  (irc-set-user-info connection nick real-name)
-  connection)
+  (irc-set-user-info connection "schubot" "*" "*" real-name)
+  (values connection sema))
+
+(define ((listen-for-connect sema) message connection handler-id)
+  (match message
+    [(irc-message _ RPL_WELCOME _ _)
+     (semaphore-post sema)
+     (remove-handler connection handler-id)]
+    [_ (void)]))
 
 (define (irc-join-channel connection channel)
   (irc-send-command connection "JOIN" channel))
