@@ -12,19 +12,26 @@ The irc library allows you to develop IRC clients and communicate over IRC.
 
 @section{Quick Start}
 
-To use the IRC client library, first create a connection with @racket[irc-connect]. For example, to connect to the server my-server.org on port 1234 with nickname "fred", username "fsmith", and real name "Fred Smith", do
+To use the IRC client library, first create a connection with @racket[irc-connect]. For example, to
+connect to the Freenode (chat.freenode.net, port 6667) with nickname "rackbot", username "rbot", and real
+name "Racket Bot", do
 
-@racket[(irc-connect "my-server.org" 1234 "fred" "fsmith" "Fred Smith")]
+@racketblock[
+(define-values (connection ready)
+  (irc-connect "chat.freenode.net" 6667 "rackbot" "rbot" "Racket Bot"))]
 
-This returns an @racket[irc-connection] object which must be used for all future communication with this server, as well as an event that will be ready for synchronization when the server is ready to accept more commands (i.e. when the connection has been fully established).
+This defines an @racket[irc-connection] object which must be used for all future communication with
+this server, as well as an event that will be ready for synchronization when the server is ready to
+accept more commands (i.e. when the connection has been fully established).
 
-Once the returned event fires, you can use other IRC commands. For example, if you have a connection object named @racket[connection], you can join a channel with
+Once the returned event fires, you can use other IRC commands. For example, if you have a connection
+object named @racket[connection], you can join the #racket channel with
 
-@racket[(irc-join connection "#some-channel")]
+@racket[(irc-join connection "#racket")]
 
 Once you have joined, you can send a message on that channel with the following:
 
-@racket[(irc-send connection "#some-channel" "Hello, world!")]
+@racket[(irc-send connection "#racket" "Hello, world!")]
 
 @section{Data Structures}
 
@@ -33,7 +40,9 @@ Once you have joined, you can send a message on that channel with the following:
              [command string?]
              [parameters (listof string?)])]{
 
-  Represents an IRC message, parsed into the @racket[prefix], @racket[command], and @racket[parameters]. If the message did not contain a prefix, @racket[prefix] is @racket[#f]. The original raw message line is available in the @racket[content] field.}
+  Represents an IRC message, parsed into the @racket[prefix], @racket[command], and
+  @racket[parameters]. If the message did not contain a prefix, @racket[prefix] is @racket[#f]. The
+  original raw message line is available in the @racket[content] field.}
 
 @section{Procedures}
 
@@ -49,14 +58,26 @@ Once you have joined, you can send a message on that channel with the following:
                       [real-name string?])
           (values irc-connection? evt?)]{
 
-  Connects to @racket[server] on @racket[port] using @racket[nick] as the IRC nickname, @racket[username] as the username, and @racket[real-name] as the user's real name. Returns a connection object and an event that will be ready for synchronization when the server is ready to accept more commands.}
+  Connects to @racket[server] on @racket[port] using @racket[nick] as the IRC nickname,
+  @racket[username] as the username, and @racket[real-name] as the user's real name. Returns a
+  connection object and an event that will be ready for synchronization when the server is ready to
+  accept more commands.}
 
 @defproc[(irc-connection-incoming [connection irc-connection?])
          async-channel?]{
 
-  Returns the channel for incoming messages on the given connection. All responses from the server are sent to this channel, and will be an @racket[irc-raw-message] or one of its subtypes.}
+  Returns the channel for incoming messages on the given connection. All responses from the server are
+  sent to this channel, and will be an @racket[irc-message] or one of its subtypes, or @racket[eof] if
+  the server closes the connection and the @racket[return-eof] option was used when establishing the
+  connection.}
 
 @defproc[(irc-join-channel [connection irc-connection?]
+                           [channel string?])
+         void?]{
+
+  Parts from (leaves) the IRC channel @racket[channel].}
+
+@defproc[(irc-part-channel [connection irc-connection?]
                            [channel string?])
          void?]{
 
@@ -67,4 +88,57 @@ Once you have joined, you can send a message on that channel with the following:
                            [message string?])
          void?]{
 
-  Sends @racket[message] to @racket[target]. @racket[target] should be either a channel name or an IRC nick.}
+  Sends @racket[message] to @racket[target]. @racket[target] should be either a channel name or an IRC
+  nick.}
+
+@defproc[(irc-send-notice [connection irc-connection?]
+                          [target string?]
+                          [notice string?])
+         void?]{
+
+  Sends the notice @racket[notice] to @racket[target]. @racket[target] should be either a channel name
+  or an IRC nick.}
+
+@defproc[(irc-get-connection [host string?]
+                             [port (and/c exact-nonnegative-integer?
+                                   (integer-in 1 65535))]
+                             [#:return-eof return-eof boolean? #f])
+         irc-connection?]{
+
+  Establishes a connection to the IRC server @racket[host] on the given @racket[port]. When
+  @racket[return-eof] is @racket[#t], @racket[eof] will be returned over the incoming channel when the
+  server closes the connection.
+
+  Use this form instead of @racket[irc-connect] when you want more control over when to send the NICK
+  and USER commands.}
+
+@defproc[(irc-set-nick [connection irc-connection?]
+                       [nick string?])
+         void?]{
+
+  Sets the nickname for this connection to @racket[nick]. Note that @racket[irc-connect] runs this
+  command for you when the connection is first established.}
+
+@defproc[(irc-set-user-info [connection irc-connection?]
+                            [username string?]
+                            [real-name string?])
+         void?]{
+
+  Sets the user name and real name for this connection to @racket[username] and @racket[real-name],
+  respectively . Note that @racket[irc-connect] runs this command for you when the connection is first
+  established.}
+
+@defproc[(irc-quit [connection irc-connection?]
+                   [quit-message string? ""])
+         void?]{
+
+  Quits the IRC session with an optional @racket[quit-message] and closes the connection.}
+
+@defproc[(irc-send-command [connection irc-connection?]
+                           [command string?]
+                           [args string?] ...)
+         void?]{
+
+  Sends the given IRC @racket[command] ands its @racket[args] over the given @racket[connection]. This
+  is the most general method for sending commands to IRC, but the other functions described above
+  should be preferred where applicable.}
