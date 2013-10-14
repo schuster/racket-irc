@@ -38,7 +38,8 @@ Once you have joined, you can send a message on that channel with the following:
 @defstruct*[irc-message
             ([prefix (or/c string? #f)]
              [command string?]
-             [parameters (listof string?)])]{
+             [parameters (listof string?)]
+             [content string?])]{
 
   Represents an IRC message, parsed into the @racket[prefix], @racket[command], and
   @racket[parameters]. If the message did not contain a prefix, @racket[prefix] is @racket[#f]. The
@@ -142,3 +143,7 @@ Once you have joined, you can send a message on that channel with the following:
   Sends the given IRC @racket[command] ands its @racket[args] over the given @racket[connection]. This
   is the most general method for sending commands to IRC, but the other functions described above
   should be preferred where applicable.}
+
+@section{Further Information}
+
+For more information on the IRC client protocol, see @hyperlink["http://tools.ietf.org/html/rfc2812" "RFC 2812"].
