@@ -1,4 +1,4 @@
 #lang setup/infotab
 
-(define version "0.2")
+(define version "1.0")
 (define deps (list))
