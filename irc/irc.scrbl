@@ -27,11 +27,11 @@ accept more commands (i.e. when the connection has been fully established).
 Once the returned event fires, you can use other IRC commands. For example, if you have a connection
 object named @racket[connection], you can join the #racket channel with
 
-@racket[(irc-join connection "#racket")]
+@racket[(irc-join-channel connection "#racket")]
 
 Once you have joined, you can send a message on that channel with the following:
 
-@racket[(irc-send connection "#racket" "Hello, world!")]
+@racket[(irc-send-message connection "#racket" "Hello, world!")]
 
 @section{Data Structures}
 
