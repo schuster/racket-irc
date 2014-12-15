@@ -76,13 +76,13 @@ Once you have joined, you can send a message on that channel with the following:
                            [channel string?])
          void?]{
 
-  Parts from (leaves) the IRC channel @racket[channel].}
+  Joins the IRC channel @racket[channel].}
 
 @defproc[(irc-part-channel [connection irc-connection?]
                            [channel string?])
          void?]{
 
-  Joins the IRC channel @racket[channel].}
+  Parts from (leaves) the IRC channel @racket[channel].}
 
 @defproc[(irc-send-message [connection irc-connection?]
                            [target string?]
