@@ -56,13 +56,16 @@ Once you have joined, you can send a message on that channel with the following:
                       [port (and/c exact-nonnegative-integer?
                                    (integer-in 1 65535))]
                       [nick string?]
-                      [real-name string?])
+                      [username string?]
+                      [real-name string?]
+                      [#:return-eof return-eof boolean? #f])
           (values irc-connection? evt?)]{
 
   Connects to @racket[server] on @racket[port] using @racket[nick] as the IRC nickname,
   @racket[username] as the username, and @racket[real-name] as the user's real name. Returns a
   connection object and an event that will be ready for synchronization when the server is ready to
-  accept more commands.}
+  accept more commands. If @racket[return-eof] is @racket[#t], the incoming stream will include an
+  end-of-file whenever the underlying TCP stream receives one (e.g. if the connection fails).}
 
 @defproc[(irc-connection-incoming [connection irc-connection?])
          async-channel?]{
