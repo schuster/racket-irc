@@ -23,6 +23,9 @@
          racket/tcp
          "private/numeric-replies.rkt")
 
+(module+ test
+  (require rackunit))
+
 (struct irc-connection (in-port out-port in-channel handlers))
 (struct irc-message (prefix command parameters content) #:transparent)
 
@@ -132,7 +135,7 @@
 ;; Given the string of an IRC message, returns an irc-message that has been parsed as far as possible,
 ;; or #f if the input was unparsable
 (define (parse-message message)
-  (define parts (string-split message))
+  (define parts (string-split message " " #:trim? #f))
   (define prefix (if (and (pair? parts)
                           (string-starts-with? (list-ref parts 0) ":"))
                      (substring (list-ref parts 0) 1)
@@ -171,13 +174,15 @@
         [else #f]))
 
 (define (string-starts-with? s1 s2)
-  (equal? (substring s1 0 (string-length s2))
-          s2))
+  (define s1-prefix (if (= 0 (string-length s1)) "" (substring s1 0 (string-length s2))))
+  (equal? s1-prefix s2))
+
+(module+ test
+  (check-true (string-starts-with? "ab" "a"))
+  (check-false (string-starts-with? "" "a")))
 
 ;; Run these via ``raco test main.rkt''
 (module+ test
-  (require rackunit)
-
   (define (message-equal? m1 m2)
     (and (equal? (irc-message-prefix m1) (irc-message-prefix m2))
          (equal? (irc-message-command m1) (irc-message-command m2))
