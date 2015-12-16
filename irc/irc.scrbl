@@ -58,14 +58,16 @@ Once you have joined, you can send a message on that channel with the following:
                       [nick string?]
                       [username string?]
                       [real-name string?]
-                      [#:return-eof return-eof boolean? #f])
+                      [#:return-eof return-eof boolean? #f]
+                      [#:ssl ssl boolean? #f])
           (values irc-connection? evt?)]{
 
   Connects to @racket[server] on @racket[port] using @racket[nick] as the IRC nickname,
   @racket[username] as the username, and @racket[real-name] as the user's real name. Returns a
   connection object and an event that will be ready for synchronization when the server is ready to
   accept more commands. If @racket[return-eof] is @racket[#t], the incoming stream will include an
-  end-of-file whenever the underlying TCP stream receives one (e.g. if the connection fails).}
+  end-of-file whenever the underlying TCP stream receives one (e.g. if the connection fails).
+  If @racket[ssl] is @racket[#t] the connection will be made over SSL/TLS.}
 
 @defproc[(irc-connection-incoming [connection irc-connection?])
          async-channel?]{
@@ -106,12 +108,13 @@ Once you have joined, you can send a message on that channel with the following:
 @defproc[(irc-get-connection [host string?]
                              [port (and/c exact-nonnegative-integer?
                                    (integer-in 1 65535))]
-                             [#:return-eof return-eof boolean? #f])
+                             [#:return-eof return-eof boolean? #f]
+                             [#:ssl ssl boolean? #f])
          irc-connection?]{
 
   Establishes a connection to the IRC server @racket[host] on the given @racket[port]. When
   @racket[return-eof] is @racket[#t], @racket[eof] will be returned over the incoming channel when the
-  server closes the connection.
+  server closes the connection. If @racket[ssl] is @racket[#t] the connection will be made over SSL/TLS.
 
   Use this form instead of @racket[irc-connect] when you want more control over when to send the NICK
   and USER commands.}
