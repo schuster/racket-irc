@@ -93,7 +93,7 @@
 
 ;; Connects to an IRC server, returning the connection and an event that will be ready for
 ;; synchronization when the server is ready for more commands
-(define (irc-connect server port nick username real-name #:return-eof [return-eof #f] #:ssl ssl)
+(define (irc-connect server port nick username real-name #:return-eof [return-eof #f] #:ssl [ssl #f])
   (define connection (irc-get-connection server port #:return-eof return-eof #:ssl ssl))
   (define sema (make-semaphore))
   (add-handler connection (listen-for-connect sema))
