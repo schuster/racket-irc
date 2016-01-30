@@ -59,7 +59,7 @@ Once you have joined, you can send a message on that channel with the following:
                       [username string?]
                       [real-name string?]
                       [#:return-eof return-eof boolean? #f]
-                      [#:ssl ssl boolean? #f])
+                      [#:ssl ssl (or/c ssl-client-context? 'auto 'sslv2-or-v3 'sslv2 'sslv3 'tls 'tls11 'tls12 boolean?) #f])
           (values irc-connection? evt?)]{
 
   Connects to @racket[server] on @racket[port] using @racket[nick] as the IRC nickname,
@@ -67,7 +67,8 @@ Once you have joined, you can send a message on that channel with the following:
   connection object and an event that will be ready for synchronization when the server is ready to
   accept more commands. If @racket[return-eof] is @racket[#t], the incoming stream will include an
   end-of-file whenever the underlying TCP stream receives one (e.g. if the connection fails).
-  If @racket[ssl] is @racket[#t] the connection will be made over SSL/TLS.}
+  If @racket[ssl] is not @racket[#f] the connection will be made over SSL/TLS with the appropriate
+  SSL/TLS mode or client context.}
 
 @defproc[(irc-connection-incoming [connection irc-connection?])
          async-channel?]{
@@ -109,12 +110,13 @@ Once you have joined, you can send a message on that channel with the following:
                              [port (and/c exact-nonnegative-integer?
                                    (integer-in 1 65535))]
                              [#:return-eof return-eof boolean? #f]
-                             [#:ssl ssl boolean? #f])
+                             [#:ssl ssl (or/c ssl-client-context? 'auto 'sslv2-or-v3 'sslv2 'sslv3 'tls 'tls11 'tls12 boolean?) #f])
          irc-connection?]{
 
   Establishes a connection to the IRC server @racket[host] on the given @racket[port]. When
   @racket[return-eof] is @racket[#t], @racket[eof] will be returned over the incoming channel when the
-  server closes the connection. If @racket[ssl] is @racket[#t] the connection will be made over SSL/TLS.
+  server closes the connection. If @racket[ssl] is not @racket[#f] the connection will be made over
+  SSL/TLS with the appropriate SSL/TLS mode or client context.
 
   Use this form instead of @racket[irc-connect] when you want more control over when to send the NICK
   and USER commands.}

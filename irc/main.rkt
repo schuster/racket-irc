@@ -32,8 +32,13 @@
 
 (define irc-connection-incoming irc-connection-in-channel)
 
-(define (irc-get-connection host port #:return-eof [return-eof #f] #:ssl [ssl #f])
-  (define-values (in out) ((if ssl ssl-connect tcp-connect) host port))
+(define (irc-get-connection host port
+                            #:return-eof [return-eof #f]
+                            #:ssl [ssl #f])
+  (define-values (in out) (match ssl
+                            [#f (tcp-connect host port)]
+                            [#t (ssl-connect host port)]
+                            [_ (ssl-connect host port ssl)]))
   (file-stream-buffer-mode out 'line)
   (define in-channel (make-async-channel))
   (define handlers (make-hash))
