@@ -152,6 +152,20 @@ Once you have joined, you can send a message on that channel with the following:
   is the most general method for sending commands to IRC, but the other functions described above
   should be preferred where applicable.}
 
+@section{CTCP}
+
+CTCP is an embeded protocol within IRC that allows for actions such as @code{/me} commands. This
+package currently has basic support for CTCP
+
+@defproc[(ctcp-action [connection irc-connection?]
+                      [target string?]
+                      [action string?])
+         void?]{
+
+  Sends the given action to the target, usually displayed in the channel as "<sender-nick> <action>"
+  (i.e. the expected result of a @code{/me} command). @racket[target] should be either a channel name
+  or an IRC nick.}
+
 @section{Further Information}
 
 For more information on the IRC client protocol, see @hyperlink["http://tools.ietf.org/html/rfc2812" "RFC 2812"].
