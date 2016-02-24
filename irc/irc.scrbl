@@ -155,7 +155,7 @@ Once you have joined, you can send a message on that channel with the following:
 @section{CTCP}
 
 CTCP is an embeded protocol within IRC that allows for actions such as @code{/me} commands. This
-package currently has basic support for CTCP
+package currently has basic support for CTCP.
 
 @defproc[(ctcp-action [connection irc-connection?]
                       [target string?]
