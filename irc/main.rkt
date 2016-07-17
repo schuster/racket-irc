@@ -81,7 +81,7 @@
 (define (handle-ping message connection handler-key)
   (match message
     [(irc-message _ "PING" params _)
-     (irc-send-command connection "PONG" "pongresponse")]
+     (irc-send-command connection "PONG" (string-append ":" (first params)))]
     [_ (void)]))
 
 (define (irc-set-nick connection nick)
