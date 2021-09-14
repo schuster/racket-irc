@@ -143,7 +143,7 @@
 (define (parse-message message)
   (define parts (string-split message " " #:trim? #f))
   (define prefix (if (and (pair? parts)
-                          (string-starts-with? (list-ref parts 0) ":"))
+                          (string-prefix? (list-ref parts 0) ":"))
                      (substring (list-ref parts 0) 1)
                      #f))
   (cond [(> (length parts) (if prefix 1 0))
@@ -157,7 +157,7 @@
   (define first-tail-part (find-first-tail-part parts))
   (cond [first-tail-part
          (define tail-with-colon (string-join (list-tail parts first-tail-part)))
-         (define tail-param (if (string-starts-with? tail-with-colon ":")
+         (define tail-param (if (string-prefix? tail-with-colon ":")
                                 (substring tail-with-colon 1)
                                 tail-with-colon))
          (append (take parts first-tail-part)
@@ -166,7 +166,7 @@
 
 ;; Return the index of the first part that starts the tail parameters; of #f if no tail exists
 (define (find-first-tail-part param-parts)
-  (define first-colon-index (memf/index (lambda (v) (string-starts-with? v ":"))
+  (define first-colon-index (memf/index (lambda (v) (string-prefix? v ":"))
                                         param-parts))
   (cond [(or first-colon-index (> (length param-parts) 14))
          (min 14 (if first-colon-index first-colon-index 14))]
@@ -178,14 +178,6 @@
   (define memf-result (memf proc lst))
   (cond [memf-result (- (length lst) (length memf-result))]
         [else #f]))
-
-(define (string-starts-with? s1 s2)
-  (define s1-prefix (if (= 0 (string-length s1)) "" (substring s1 0 (string-length s2))))
-  (equal? s1-prefix s2))
-
-(module+ test
-  (check-true (string-starts-with? "ab" "a"))
-  (check-false (string-starts-with? "" "a")))
 
 ;; Run these via ``raco test main.rkt''
 (module+ test
