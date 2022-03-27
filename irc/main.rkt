@@ -49,7 +49,7 @@
   (thread (lambda ()
             (let loop ()
               (sync in)
-              (define line (if (port-closed? in) eof (read-line in)))
+              (define line (if (port-closed? in) eof (read-line in 'return-linefeed)))
               (cond
                [(eof-object? line)
                 (when return-eof
