@@ -4,7 +4,7 @@
 (require irc)
 
 (define-values (connection ready-event)
-  (irc-connect "chat.freenode.net" 6667 "schubot" "schubot" "Schuster's Echo Bot"))
+  (irc-connect "irc.libera.chat" 6667 "schubot" "schubot" "Schuster's Echo Bot"))
 (void (sync ready-event))
 
 (irc-join-channel connection "##racketirctest")

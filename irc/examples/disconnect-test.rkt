@@ -6,7 +6,7 @@
          racket/async-channel)
 
 (define-values (conn ready)
-  (irc-connect "chat.freenode.net" 6667 "rackbot" "rbot" "Racket Bot" #:return-eof #t))
+  (irc-connect "irc.libera.chat" 6667 "rackbot" "rbot" "Racket Bot" #:return-eof #t))
 
 (sync ready)
 
