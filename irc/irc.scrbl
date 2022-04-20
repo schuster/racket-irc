@@ -13,12 +13,12 @@ The irc library allows you to develop IRC clients and communicate over IRC.
 @section{Quick Start}
 
 To use the IRC client library, first create a connection with @racket[irc-connect]. For example, to
-connect to the Freenode (chat.freenode.net, port 6667) with nickname "rackbot", username "rbot", and real
+connect to the Libera.Chat network (irc.libera.chat, port 6667) with nickname "rackbot", username "rbot", and real
 name "Racket Bot", do
 
 @racketblock[
 (define-values (connection ready)
-  (irc-connect "chat.freenode.net" 6667 "rackbot" "rbot" "Racket Bot"))]
+  (irc-connect "irc.libera.chat" 6667 "rackbot" "rbot" "Racket Bot"))]
 
 This defines an @racket[irc-connection] object which must be used for all future communication with
 this server, as well as an event that will be ready for synchronization when the server is ready to
